@@ -285,7 +285,7 @@ namespace Couchbase.Lite.Support
             else
             {
                 curAttachment.Finish();
-                String md5String = curAttachment.MD5DigestString();
+				String md5String = curAttachment.SHA1DigestString (); //.MD5DigestString();
                 attachmentsBySHA1Digest.Put(md5String, curAttachment);
                 curAttachment = null;
             }

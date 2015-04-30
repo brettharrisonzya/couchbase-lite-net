@@ -2,8 +2,9 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildCommunityTasksPath Condition=" '$(MSBuildCommunityTasksPath)' == '' ">$(SolutionDir)\packages\MSBuildTasks.1.4.0.88\tools</MSBuildCommunityTasksPath>
-    <SetAssemblyVersionEnabled Condition=" Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets') ">true</SetAssemblyVersionEnabled>
+    <SetAssemblyVersionEnabled Condition=" Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets') ">false</SetAssemblyVersionEnabled>
     <SetAssemblyVersionEnabled Condition=" '$(SetAssemblyVersionEnabled)' == '' ">false</SetAssemblyVersionEnabled>
+    <SynchReleaseVersion>false</SynchReleaseVersion>
   </PropertyGroup>
   <Import Condition=" '$(SetAssemblyVersionEnabled)' == 'true' " Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets" />
   <Target Name="SetAssemblyVersion" Condition=" '$(SetAssemblyVersionEnabled)' == 'true' " BeforeTargets="PrepareForBuild">
@@ -22,7 +23,6 @@
     <RootNamespace>Couchbase.Lite.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AssemblyName>Couchbase.Lite</AssemblyName>
-    <ReleaseVersion>1.1</ReleaseVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -31,7 +31,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;__IOS__;TRACE;VERBOSE;</DefineConstants>
+    <DefineConstants>DEBUG;__IOS__;TRACE;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -72,6 +72,9 @@
     </Reference>
     <Reference Include="Jint">
       <HintPath>..\packages\Jint.2.4.0\lib\portable-net40+sl50+win+wpa81+wp80\Jint.dll</HintPath>
+    </Reference>
+    <Reference Include="ModernHttpClient">
+      <HintPath>..\packages\modernhttpclient.2.4.0\lib\Xamarin.iOS10\ModernHttpClient.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

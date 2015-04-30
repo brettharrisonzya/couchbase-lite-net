@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildCommunityTasksPath Condition=" '$(MSBuildCommunityTasksPath)' == '' ">$(SolutionDir)\packages\MSBuildTasks.1.4.0.88\tools</MSBuildCommunityTasksPath>
-    <SetAssemblyVersionEnabled Condition=" Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets') ">true</SetAssemblyVersionEnabled>
+    <SetAssemblyVersionEnabled Condition=" Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets') ">false</SetAssemblyVersionEnabled>
     <SetAssemblyVersionEnabled Condition=" '$(SetAssemblyVersionEnabled)' == '' ">false</SetAssemblyVersionEnabled>
   </PropertyGroup>
   <Import Condition=" '$(SetAssemblyVersionEnabled)' == 'true' " Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets" />
@@ -24,12 +24,12 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <AndroidResgenClass>Resource</AndroidResgenClass>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
-    <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
+    <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
     <AssemblyName>Couchbase.Lite</AssemblyName>
     <ReleaseVersion>1.1</ReleaseVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFrameworkVersion>v2.3</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -70,6 +70,12 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="ModernHttpClient">
+      <HintPath>..\packages\modernhttpclient.2.4.0\lib\MonoAndroid\ModernHttpClient.dll</HintPath>
+    </Reference>
+    <Reference Include="OkHttp">
+      <HintPath>..\packages\modernhttpclient.2.4.0\lib\MonoAndroid\OkHttp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

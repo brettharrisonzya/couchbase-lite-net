@@ -49,6 +49,7 @@ using System.Security.Cryptography.X509Certificates;
 using Couchbase.Lite.Replicator;
 using Couchbase.Lite.Support;
 using Couchbase.Lite.Util;
+using ModernHttpClient;
 
 #if NET_3_5
 using System.Net.Couchbase;
@@ -132,13 +133,16 @@ namespace Couchbase.Lite.Support
         /// </summary>
         internal HttpMessageHandler BuildHandlerPipeline ()
         {
+			/*
             var handler = new HttpClientHandler {
                 CookieContainer = cookieStore,
                 UseDefaultCredentials = true,
                 UseCookies = true,
-            };
+            };*/
 
-            var authHandler = new DefaultAuthHandler (handler, cookieStore);
+			var authHandler = new NativeMessageHandler (false, false, new NativeCookieHandler ());
+
+            //var authHandler = new DefaultAuthHandler (handler, cookieStore);
 
             var retryHandler = new TransientErrorRetryHandler(authHandler);
 
@@ -152,7 +156,8 @@ namespace Couchbase.Lite.Support
             // As the handler will not be shared, client.Dispose() needs to be 
             // called once the operation is done to release the unmanaged resources 
             // and disposes of the managed resources.
-            var client =  new HttpClient(authHandler, true) 
+
+			var client =  new HttpClient(authHandler, true) 
             {
                 Timeout = ManagerOptions.Default.RequestTimeout,
             };
