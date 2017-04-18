@@ -132,7 +132,7 @@ namespace Couchbase.Lite.Replicator
 
             var blobWriter = LocalDatabase.AttachmentWriter;
 
-            _remoteSession.SendAsyncAttachmentRequest(HttpMethod.Get, pathInside, (buffer, bytesRead, complete, e) =>
+            _remoteSession.SendAsyncAttachmentRequest(HttpMethod.Get, pathInside, (contentLength, buffer, bytesRead, complete, e) =>
             {
                 try
                 {
@@ -142,18 +142,8 @@ namespace Couchbase.Lite.Replicator
                     if (buffer != null && e == null && bytesRead > 0)
                     {
                         Log.V(TAG, string.Format("read {0} bytes", bytesRead));
-                        if (bytesRead != buffer.Length)
-                        {
-                            byte[] subBuffer = new byte[bytesRead];
-                            Array.Copy(buffer, subBuffer, bytesRead);
-                            blobWriter.AppendData(subBuffer);
-                        }
-                        else
-                        {
-                            blobWriter.AppendData(buffer);
-                        }
 
-                        req.AppendData(buffer, bytesRead);
+                        req.AppendData(contentLength, buffer, bytesRead);
                     }
                     else if (e != null)
                     {
@@ -164,17 +154,14 @@ namespace Couchbase.Lite.Replicator
 
                     if (req.progress != null)
                     {
-                        req.progress(buffer, bytesRead, complete, e);
+                        req.progress(contentLength, buffer, bytesRead, complete, e);
                     }
 
                     if (complete == true)
                     {
-                        if (e == null)
-                        {
-                            blobWriter.Finish();
-                            blobWriter.Install();
-                        }
-                        else
+                        Console.WriteLine("attachment complete: " + pathInside);
+
+                        if (e != null)
                         {
                             req.SetError();
                         }
@@ -193,6 +180,21 @@ namespace Couchbase.Lite.Replicator
                         // are still revisions waiting to be pulled:
                         --_httpConnectionCount;
                         PullRemoteAttachments ();
+
+                        if (e == null)
+                        {
+                            var bytes = req.GetBuffer();
+                            if (bytes == null)
+                            {
+                                Log.E (TAG, "Error pulling remote attachment GettBuffer == null");
+                            }
+                            else
+                            {
+                                blobWriter.AppendData(bytes, req.GetBufferLength());
+                                blobWriter.Finish();
+                                blobWriter.Install();
+                            }
+                        }
                     }
                 }
                 catch(Exception ex)
