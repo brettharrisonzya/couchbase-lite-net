@@ -186,7 +186,7 @@ namespace Couchbase.Lite.Replicator
                             var bytes = req.GetBuffer();
                             if (bytes == null)
                             {
-                                Log.E (TAG, "Error pulling remote attachment GettBuffer == null");
+                                Log.E (TAG, "Error pulling remote attachment GetBuffer == null");
                             }
                             else
                             {
