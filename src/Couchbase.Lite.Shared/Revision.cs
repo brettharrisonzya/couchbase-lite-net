@@ -284,7 +284,7 @@ namespace Couchbase.Lite
                 RevisionInternal revInt = new RevisionInternal(att.Revision.Document.Id, att.Document.CurrentRevision.RevisionInternal.RevID, false);
                 puller.AddToInbox(revInt); // to trigger the batcher thread
 
-                req.WaitForComple();
+                req.WaitForComplete();
 
                 att.Body = req.GetStream();
 

@@ -56,5 +56,5 @@ namespace Couchbase.Lite.Support
     /// The signature for a method that can be called upon the receipt of
     /// a reponse from a remote request
     /// </summary>
-    public delegate void RemoteRequestProgress(byte[] data, int bytesRead, bool complete, Exception e);
+    public delegate void RemoteRequestProgress(long contentLength, byte[] data, int bytesRead, bool complete, Exception e);
 }

@@ -22,7 +22,7 @@ namespace Couchbase.Lite.Internal
             stream = new MemoryStream();
         }
 
-        public void WaitForComple()
+        public void WaitForComplete()
         {
             completeEvent.WaitOne();
         }
@@ -37,10 +37,15 @@ namespace Couchbase.Lite.Internal
             error = true;
         }
 
-        public void AppendData(byte[] buffer, int bytesRead)
+        public void AppendData(long totalSize, byte[] buffer, int bytesRead)
         {
             lock(_locker)
             {
+                if (totalSize > 0 && stream.Capacity < totalSize)
+                {
+                    stream.Capacity = (int)totalSize;
+                }
+
                 stream.Write(buffer, 0, bytesRead);
             }
         }
@@ -52,10 +57,10 @@ namespace Couchbase.Lite.Internal
                 return null;
             }
 
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[40960];
             int read;
 
-            MemoryStream output = new MemoryStream();
+            MemoryStream output = new MemoryStream(stream.Capacity);
 
             lock(_locker)
             {
@@ -71,6 +76,15 @@ namespace Couchbase.Lite.Internal
 
             return output;
         }
+
+        public byte[] GetBuffer()
+        {
+            return stream.GetBuffer();
+        }
+
+        public long GetBufferLength()
+        {
+            return stream.Length;
+        }
     }
 }
-

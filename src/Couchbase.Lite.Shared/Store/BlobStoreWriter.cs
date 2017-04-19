@@ -141,6 +141,20 @@ namespace Couchbase.Lite
             }
         }
 
+        public void AppendData(byte[] data, long len)
+        {
+            length += len;
+            sha1Digest.Update(data, 0, (int)len);
+            md5Digest.Update(data, 0, (int)len);
+
+            try {
+                outStream.Write(data, 0, (int)len);
+            } catch (IOException e) {
+                throw Misc.CreateExceptionAndLog(Log.To.Database, e, Tag,
+                    "Unable to write to stream");
+            }
+        }
+
         internal void Read(Stream inputStream)
         {
             byte[] buffer = new byte[16384];
