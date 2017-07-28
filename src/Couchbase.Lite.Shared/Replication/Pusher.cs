@@ -587,6 +587,8 @@ namespace Couchbase.Lite.Replicator
 
         public override bool IsPull { get { return false; } }
 
+        public override bool IsAttachmentPull { get { return false; } }
+
         protected internal override void MaybeCreateRemoteDB()
         {
             if (!CreateTarget) {

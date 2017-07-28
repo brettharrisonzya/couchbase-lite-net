@@ -79,6 +79,13 @@ namespace Couchbase.Lite.Internal
 
         public bool Disposed { get; private set; }
 
+#if __IOS__
+        private HttpClient _iosHttpClient = new HttpClient(new NSUrlSessionHandler(), true)
+        {
+            Timeout = ReplicationOptions.DefaultRequestTimeout
+        };
+#endif
+
         public int RequestCount
         {
             get {
@@ -462,6 +469,118 @@ namespace Couchbase.Lite.Internal
                 }
             }, _cancellationTokenSource.Token);
             _requests.TryAdd(message, t);
+        }
+
+        internal void ReadAttachmentStream(long contentLength, Stream stream, RemoteRequestProgress progressHandler,
+                                            HttpRequestMessage message)
+        {
+            byte[] responseBuffer = new byte[102400];
+
+            try
+            {
+                stream.ReadAsync(responseBuffer, 0, responseBuffer.Length, _cancellationTokenSource.Token)
+                    .ContinueWith((res) => {
+                        var bytesRead = res.Result;
+                        progressHandler(contentLength, responseBuffer, bytesRead, bytesRead == 0, null);
+
+                        if (bytesRead <= 0)
+                        {
+                            Task dummy;
+                            _requests.TryRemove(message, out dummy);
+                        }
+                        else
+                        {
+                            ReadAttachmentStream(contentLength, stream, progressHandler, message);
+                        }
+                    });
+            }
+            catch (Exception ex)
+            {
+                progressHandler (contentLength, new byte[1], 0, true, ex);
+            }
+        }
+
+        internal void SendAsyncAttachmentRequest (HttpMethod method, String relativePath,
+                                                        RemoteRequestProgress progressHandler)
+        {
+            Uri url = null;
+            try {
+                url = _baseUrl.Append(relativePath);
+            } catch (UriFormatException e) {
+                throw new ArgumentException ("Invalid URI format.", e);
+            }
+
+            var message = new HttpRequestMessage (method, url);
+            message.Headers.Add ("Accept", "*/*");
+
+#if __IOS__  // hack to get a client with NSUrlSessionHandler which is much faster
+            var client = _iosHttpClient;
+#else
+            var client = default(CouchbaseLiteHttpClient);
+            if(!_client.AcquireFor(TimeSpan.FromSeconds(1), out client)) {
+                Log.To.Sync.I(Tag, "Client is disposed, aborting request to {0}", new SecureLogString(relativePath, LogMessageSensitivity.PotentiallyInsecure));
+                return;
+            }
+
+            client.Authenticator = Authenticator;
+#endif
+
+            long contentLength = 0;
+
+            var _lastError = default(Exception);
+            try {
+                Console.WriteLine("pulling attachment: " + relativePath);
+
+                var request = client.SendAsync (message, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token);
+
+                request.ContinueWith (response => {
+                    //Log.To.Sync.I(Tag, "pulling attachment response: " + relativePath);
+                    try
+                    {
+                        if (response.Status != TaskStatus.RanToCompletion) {
+                            Log.To.Sync.E (Tag, "SendAsyncRequest did not run to completion.");
+                            return null;
+                        }
+                        if ((int)response.Result.StatusCode > 300) {
+                            _lastError = new HttpResponseException (response.Result.StatusCode);
+                            Log.To.Sync.E (Tag, "Server returned HTTP Error", _lastError);
+                            return null;
+                        }
+
+                        return response.Result.Content.ReadAsStreamAsync ();
+                    }
+                    catch(Exception e)
+                    {
+                        Log.To.Sync.E(Tag, "client.SendAsync execption: ", e);
+                        return null;
+                    }
+                }, _cancellationTokenSource.Token, TaskContinuationOptions.LongRunning, _workExecutor.Scheduler)
+                .ContinueWith (response => {
+                    try {
+                        var hasEmptyResult = response.Result == null;
+                        if (response.Status != TaskStatus.RanToCompletion) {
+                            throw new CouchbaseLiteException("SendAsyncRequest did not run to completion");
+                        } else if (hasEmptyResult) {
+                            throw new CouchbaseLiteException("Empty result");
+                        }
+
+                        Stream stream = response.Result.Result;
+                        ReadAttachmentStream(contentLength, stream, progressHandler, message);
+/*
+                        do {
+                            byteRead = stream.Read (responseBuffer, 0, responseBuffer.Length);
+                            progressHandler (contentLength, responseBuffer, byteRead, byteRead == 0, null);
+                        } while(byteRead != 0);
+*/
+                    } catch (Exception ex) {
+                        progressHandler (contentLength, new byte[1], 0, true, ex);
+                    }
+                }, _cancellationTokenSource.Token, TaskContinuationOptions.LongRunning, _workExecutor.Scheduler);
+                _requests.TryAdd(message, request);
+            } catch (Exception e) {
+                Log.To.Sync.E (Tag, "SendAsyncAttachmentRequest response did not run to completion.", e);
+                progressHandler (contentLength, new byte[1], 0, true, e);
+            }
         }
 
         private void AddRequestHeaders(HttpRequestMessage request)
