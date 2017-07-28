@@ -55,6 +55,7 @@
     <DefineConstants>ANDROID;TRACE;</DefineConstants>
     <DebugType>pdbonly</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Couchbase.Lite.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Packaging|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -67,6 +68,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ConsolePause>false</ConsolePause>
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+    <DocumentationFile>bin\Packaging\Couchbase.Lite.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -118,7 +120,7 @@
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Target Condition=" '$(Configuration)' == 'Packaging' Or '$(Archive)' == 'true'" Name="AfterBuild">
     <MakeDir Directories="$(SolutionDir)..\staging\Couchbase.Lite\MonoAndroid" />
-    <Copy SourceFiles="$(OutputPath)Couchbase.Lite.dll;$(OutputPath)Couchbase.Lite.$(mdb);$(OutputPath)websocket-sharp.dll;$(OutputPath)websocket-sharp.$(mdb)" DestinationFolder="$(SolutionDir)..\staging\Couchbase.Lite\MonoAndroid" />
+    <Copy SourceFiles="$(OutputPath)Couchbase.Lite.dll;$(OutputPath)Couchbase.Lite.$(mdb);$(OutputPath)websocket-sharp.dll;$(OutputPath)websocket-sharp.$(mdb);$(OutputPath)Couchbase.Lite.xml" DestinationFolder="$(SolutionDir)..\staging\Couchbase.Lite\MonoAndroid" />
   </Target>
   <ItemGroup>
     <Content Include="..\Couchbase.Lite.Shared\Properties\DynamicAssemblyInfo.tt">

@@ -939,7 +939,7 @@ namespace Couchbase.Lite
         /// <summary>
         /// Increments the count of failed revisions for the replication
         /// </summary>
-        protected void RevisionFailed()
+        protected internal void RevisionFailed()
         {
             _revisionsFailed++;
         }
@@ -1133,7 +1133,7 @@ namespace Couchbase.Lite
             SetupRevisionBodyTransformationFunction();
 
             Log.To.Sync.I(Tag, "Beginning replication process...");
-            LastSequence = null;
+            _lastSequence = null;
             Login();
         }
 

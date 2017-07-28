@@ -188,6 +188,7 @@
     </ProjectReference>
   </ItemGroup>
   <Target Condition=" '$(Configuration)' == 'Packaging' Or '$(Archive)' == 'true'" AfterTargets="Build">
+		<Name>""</Name>
 		<ItemGroup>
             <x Include="$(OutputPath)LiteServ.app\**\*.*" />
 		</ItemGroup>
