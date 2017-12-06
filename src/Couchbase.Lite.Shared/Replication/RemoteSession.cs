@@ -592,6 +592,10 @@ namespace Couchbase.Lite.Internal
 
         private void UpdateServerType(HttpResponseMessage response)
         {
+            if (response == null || response.Headers == null) {
+                return;
+            }
+
             var server = response.Headers.Server;
             if(server != null && server.Any()) {
                 var serverString = String.Join(" ", server.Select(pi => pi.Product).Where(pi => pi != null).ToStringArray());
